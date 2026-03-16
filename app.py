@@ -2,46 +2,49 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Dashboard de Dados", layout="wide")
+st.set_page_config(layout="wide")
 
-st.title("📊 Dashboard Automático")
+# ====== FUNDO TECNOLÓGICO ======
+st.markdown("""
+<style>
+.stApp{
+background: linear-gradient(180deg,#05070d,#0b1220);
+color:white;
+}
 
-arquivo = st.file_uploader("Envie um arquivo Excel ou CSV")
+.block-container{
+padding-top:2rem;
+}
 
-if arquivo is not None:
+h1{
+text-align:center;
+color:#00F0FF;
+text-shadow:0 0 20px #00F0FF;
+}
 
-    # ler arquivo
-    if arquivo.name.endswith(".csv"):
-        df = pd.read_csv(arquivo)
-    else:
-        df = pd.read_excel(arquivo)
+.css-1d391kg{
+background-color:#0b1220;
+}
+</style>
+""", unsafe_allow_html=True)
 
-    st.subheader("📋 Dados")
-    st.dataframe(df)
+st.title("🚀 Dashboard Futurista")
 
-    # selecionar apenas colunas numéricas
-    colunas_numericas = df.select_dtypes(include="number").columns
+arquivo = st.file_uploader("Enviar planilha")
 
-    if len(colunas_numericas) > 0:
+if arquivo:
+    df = pd.read_csv(arquivo)
 
-        st.subheader("📈 Estatísticas")
+    col1,col2,col3,col4 = st.columns(4)
 
-        stats = pd.DataFrame({
-            "Média": df[colunas_numericas].mean(),
-            "Soma": df[colunas_numericas].sum(),
-            "Maior": df[colunas_numericas].max(),
-            "Menor": df[colunas_numericas].min()
-        })
+    col1.metric("📊 Média", round(df.mean().mean(),2))
+    col2.metric("📈 Soma", round(df.sum().sum(),2))
+    col3.metric("🔥 Maior", round(df.max().max(),2))
+    col4.metric("❄️ Menor", round(df.min().min(),2))
 
-        st.dataframe(stats)
+    coluna = st.selectbox("Escolha coluna", df.select_dtypes("number").columns)
 
-        st.subheader("📊 Gráfico")
-
-        coluna = st.selectbox("Escolha a coluna", colunas_numericas)
-
-        fig, ax = plt.subplots()
-        df[coluna].plot(kind="bar", ax=ax)
-        st.pyplot(fig)
-
-    else:
-        st.warning("Não há colunas numéricas para análise")
+    fig, ax = plt.subplots(figsize=(10,4))
+    df[coluna].plot(color="#00F0FF", linewidth=3)
+    ax.set_facecolor("#05070d")
+    st.pyplot(fig)
