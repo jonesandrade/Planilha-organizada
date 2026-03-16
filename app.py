@@ -2,49 +2,78 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-st.set_page_config(layout="wide")
+# ===== CONFIGURAÇÃO =====
+st.set_page_config(page_title="Dashboard Futurista", layout="wide")
 
-# ====== FUNDO TECNOLÓGICO ======
+# ===== ESTILO TECNOLÓGICO =====
 st.markdown("""
 <style>
 .stApp{
 background: linear-gradient(180deg,#05070d,#0b1220);
 color:white;
 }
-
-.block-container{
-padding-top:2rem;
-}
-
 h1{
 text-align:center;
 color:#00F0FF;
-text-shadow:0 0 20px #00F0FF;
+text-shadow:0 0 25px #00F0FF;
 }
-
-.css-1d391kg{
-background-color:#0b1220;
+.metric-container{
+background:#0e1624;
+padding:20px;
+border-radius:12px;
+box-shadow:0 0 15px #00F0FF33;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🚀 Dashboard Futurista")
+st.title("🚀 Dashboard Inteligente de Dados")
 
-arquivo = st.file_uploader("Enviar planilha")
+# ===== UPLOAD =====
+arquivo = st.file_uploader("📂 Envie Excel ou CSV")
 
-if arquivo:
-    df = pd.read_csv(arquivo)
+if arquivo is not None:
 
-    col1,col2,col3,col4 = st.columns(4)
+    # ===== LEITOR INTELIGENTE =====
+    if arquivo.name.endswith(".csv"):
+        try:
+            df = pd.read_csv(arquivo)
+        except:
+            try:
+                df = pd.read_csv(arquivo, sep=";", encoding="latin1")
+            except:
+                df = pd.read_csv(arquivo, sep=";", encoding="utf-8")
+    else:
+        df = pd.read_excel(arquivo)
 
-    col1.metric("📊 Média", round(df.mean().mean(),2))
-    col2.metric("📈 Soma", round(df.sum().sum(),2))
-    col3.metric("🔥 Maior", round(df.max().max(),2))
-    col4.metric("❄️ Menor", round(df.min().min(),2))
+    st.success("✅ Arquivo carregado")
 
-    coluna = st.selectbox("Escolha coluna", df.select_dtypes("number").columns)
+    st.subheader("📋 Visualização")
+    st.dataframe(df)
 
-    fig, ax = plt.subplots(figsize=(10,4))
-    df[coluna].plot(color="#00F0FF", linewidth=3)
-    ax.set_facecolor("#05070d")
-    st.pyplot(fig)
+    colunas_num = df.select_dtypes(include="number").columns
+
+    if len(colunas_num) > 0:
+
+        st.subheader("📊 Indicadores")
+
+        c1, c2, c3, c4 = st.columns(4)
+
+        c1.metric("Média", round(df[colunas_num].mean().mean(),2))
+        c2.metric("Soma", round(df[colunas_num].sum().sum(),2))
+        c3.metric("Maior valor", round(df[colunas_num].max().max(),2))
+        c4.metric("Menor valor", round(df[colunas_num].min().min(),2))
+
+        st.subheader("📈 Gráfico automático")
+
+        coluna = st.selectbox("Escolha a coluna", colunas_num)
+
+        fig, ax = plt.subplots(figsize=(12,4))
+        df[coluna].plot(color="#00F0FF", linewidth=3)
+
+        ax.set_facecolor("#05070d")
+        fig.patch.set_facecolor("#05070d")
+
+        st.pyplot(fig)
+
+    else:
+        st.warning("⚠️ Nenhuma coluna numérica encontrada")
